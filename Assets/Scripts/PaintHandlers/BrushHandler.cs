@@ -7,58 +7,66 @@ using UnityEngine.UI;
 public class BrushHandler : MonoBehaviour, IPaintTool
 {
     private BitImage img;
-    private Vector2 prevPos = Vector2.zero;
+    private Vector2 _prevPosition;
     
     [SerializeField] private int radius = 5;
     public bool GetIsActive() => GetComponent<Toggle>().isOn;
     public void BrushFill(BitImage _img, int x, int y, Color newColor)
     {
         img = _img;
+        
+        if (_prevPosition == Vector2.zero)
+            _prevPosition = new Vector2(x, y);
 
-        StartCoroutine(Brush(x, y, newColor));
+        Vector2 endPosition = new Vector2(x, y);
+        var lineLength = Vector2.Distance(_prevPosition, endPosition);
+        const int lerpCountAdjustNum = 3;
+        var lerpCount = Mathf.CeilToInt(lineLength / lerpCountAdjustNum);
+
+        StartCoroutine(Brush(_prevPosition, endPosition, lerpCount, newColor));
     }
 
-    private IEnumerator Brush(float _x, float _y, Color newColor)
+    public void ResetPosition()
     {
-        int center_x = (int) _x;
-        int center_y = (int) _y;
-
-        for (int x = center_x - radius; x <= center_x + radius; x++)
-        {
-            for (int y = center_y - radius; y <= center_y + radius; y++)
-            {
-                if (!ColorHelpFunctions.IsEqualTo(img.GetPixelColor(x,y), Color.black, 0.1f))
-                    img.SetPixelColor(x, y, newColor);
-                else
-                    img.SetPixelColor(x, y, img.GetPixelColor(x,y));
-            }
-        }
+        if (_prevPosition.Equals(Vector2.zero))
+            return;
         
-        img.SetNewPixelColor();
-        yield break;
+        _prevPosition = Vector2.zero;
     }
     
-    public void BrushFillErase(BitImage _img, int x, int y)
+    private IEnumerator Brush(Vector2 prevPosition, Vector2 endPosition, int lerpCount, Color newColor)
     {
-        img = _img;
-
-        StartCoroutine(BrushErase(x, y));
-    }
-
-    private IEnumerator BrushErase(float _x, float _y)
-    {
-        int center_x = (int) _x;
-        int center_y = (int) _y;
-
-        for (int x = center_x - radius; x <= center_x + radius; x++)
+        for (int i = 1; i <= lerpCount; i++)
         {
-            for (int y = center_y - radius; y <= center_y + radius; y++)
-            {
-                img.SetPixelColor(x, y, img.GetMainPixelColor(x,y));
-            }
+            float lerpWeight = (float) i / lerpCount;
+
+            var lerpPosition = Vector2.Lerp(prevPosition, endPosition, lerpWeight);
+            
+            PaintPixelRadius((int) lerpPosition.x, (int) lerpPosition.y, newColor);
         }
-        
+        _prevPosition = endPosition;
         img.SetNewPixelColor();
         yield break;
+    }
+
+    private void PaintPixelRadius(int x, int y, Color newColor)
+    {
+        for (int _x = x - radius; _x <= x + radius; _x++)
+        {
+            for (int _y = y - radius; _y <= y + radius; _y++)
+            {
+                if (!img.CheckValidPoint(_x, _y))
+                    continue;
+                
+                Color color;
+                if (!ColorHelpFunctions.IsEqualTo(img.GetPixelColor(_x, _y), Color.black, 0.1f))
+                    color = newColor;
+                else
+                    color = img.GetPixelColor(_x, _y);
+
+                img.SetPixelColor(_x, _y, color);
+            }
+        }
+        _prevPosition = Vector2.zero;
     }
 }

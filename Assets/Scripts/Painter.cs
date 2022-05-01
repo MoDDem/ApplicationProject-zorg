@@ -23,13 +23,16 @@ public class Painter : MonoBehaviour
 
     void Update()
     {
-        if(!RectTransformUtility.RectangleContainsScreenPoint(bitImage.imgRect, 
-               Touchscreen.current.primaryTouch.ReadValue().position)) return;
-
-        if (Touchscreen.current.primaryTouch.ReadValue().phase is TouchPhase.Began or TouchPhase.Moved)
+        var touch = Touchscreen.current.primaryTouch.ReadValue();
+        var phase = touch.phase;
+        
+        if (touch.isInProgress && !colorChooser.GetActive())
         {
             var pos = TranslatePointToImagePoint();
-
+            
+            if (!bitImage.CheckValidPoint(pos.x, pos.y))
+                return;
+            
             if (brush.GetIsActive())
             {
                 brush.BrushFill(bitImage, pos.x, pos.y, (Color) colorChooser.selectedColor);
@@ -41,25 +44,37 @@ public class Painter : MonoBehaviour
             }
             else if (erase.GetIsActive())
             {
-                brush.BrushFillErase(bitImage, pos.x, pos.y);
+                erase.BrushFill(bitImage, pos.x, pos.y, Color.white);
             }
         }
+
+        if (phase is TouchPhase.Ended or TouchPhase.Canceled)
+        {
+            brush.ResetPosition();
+            erase.ResetPosition();
+            touch.phase = TouchPhase.None;
+        }
+        
     }
 
     private Vector2Int TranslatePointToImagePoint()
     {
-        Vector2 proportion = Vector2.one / canvas.transform.localScale;
-
         var touch = Touchscreen.current.primaryTouch.ReadValue();
+        var rect = RectTransformToScreenSpace(bitImage.imgRect);
         
-        Vector2 touchPointing = touch.position * proportion;
-        touchPointing.y -= (Screen.height - bitImage.imgRect.rect.height * 2) * proportion.y;
+        var minHeight = Screen.height - rect.height;
+        var mapY = math.remap(minHeight, Screen.height, 0, bitImage.paintedTexture.height, touch.position.y);
+        var mapX = math.remap(0, Screen.width, 0, bitImage.paintedTexture.width, touch.position.x);
 
-        var pos = new Vector2Int(
-            (int)math.remap(0, bitImage.imgRect.rect.width, 0, bitImage.paintedTexture.width, touchPointing.x),
-            (int)math.remap(0, bitImage.imgRect.rect.height, 0, bitImage.paintedTexture.height, touchPointing.y)
-        );
-
-        return pos;
+        return new Vector2Int(Mathf.RoundToInt(mapX),Mathf.RoundToInt(mapY));
+    }
+    
+    public Rect RectTransformToScreenSpace(RectTransform _transform)
+    {
+        Vector2 size= Vector2.Scale(_transform.rect.size, _transform.lossyScale);
+        float x= _transform.position.x + _transform.anchoredPosition.x;
+        float y= Screen.height - _transform.position.y - _transform.anchoredPosition.y;
+ 
+        return new Rect(x, y, size.x, size.y);
     }
 }

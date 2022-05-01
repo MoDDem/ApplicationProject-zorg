@@ -8,7 +8,7 @@ using Image = UnityEngine.UI.Image;
 public class ColorChooser : MonoBehaviour
 {
     public Color? selectedColor = null;
-    
+
     [SerializeField] private GameObject colorPanel;
     [SerializeField] private Image bgColor;
 
@@ -22,6 +22,8 @@ public class ColorChooser : MonoBehaviour
 
     private void Start() => ColorChanged(0);
 
+    public bool GetActive() => colorPanel.activeSelf;
+    
     public void ChangePanelVisibility() => colorPanel.SetActive(!colorPanel.activeSelf);
 
     private void ColorChanged(int id)

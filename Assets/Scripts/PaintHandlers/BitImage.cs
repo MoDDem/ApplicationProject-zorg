@@ -21,7 +21,7 @@ public class BitImage : MonoBehaviour
         pixels = texture.GetPixels();
         pixelsMain = new Color[texture.width * texture.height];
         Array.Copy(pixels, pixelsMain, texture.width * texture.height);
-        
+        paintedTexture.filterMode = FilterMode.Point;
         paintedTexture.SetPixels(pixels);
 
         Debug.Log($"{texture.width} {texture.height}");
@@ -30,8 +30,16 @@ public class BitImage : MonoBehaviour
     }
 
     public Color GetPixelColor(int x, int y) => pixels[x + y * texture.width];
-    public Color GetMainPixelColor(int x, int y) => pixelsMain[x + y * texture.width];
-    public void SetPixelColor(int x, int y, Color color) => pixels[x + y * texture.width] = color;
+
+    public bool CheckValidPoint(int x, int y) => x <= texture.width - 1 && y <= texture.height - 1 && x >= 0 && y >= 0;
+    
+    //public Color GetMainPixelColor(int x, int y) => pixelsMain[x + y * texture.width];
+    public void SetPixelColor(int x, int y, Color color)
+    { 
+        if(x + y * texture.width > pixels.LongLength) return;
+
+        pixels[x + y * texture.width] = color;
+    }
 
     public void SetNewPixelColor()
     {
