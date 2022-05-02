@@ -59,7 +59,7 @@ public class BrushHandler : MonoBehaviour, IPaintTool
                     continue;
                 
                 Color color;
-                if (!ColorHelpFunctions.IsEqualTo(img.GetPixelColor(_x, _y), Color.black, 0.1f))
+                if (!ColorHelpFunctions.IsEqualTo(img.GetMainPixelColor(_x, _y), Color.black, 0.1f))
                     color = newColor;
                 else
                     color = img.GetPixelColor(_x, _y);

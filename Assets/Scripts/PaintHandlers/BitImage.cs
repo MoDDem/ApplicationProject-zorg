@@ -33,7 +33,7 @@ public class BitImage : MonoBehaviour
 
     public bool CheckValidPoint(int x, int y) => x <= texture.width - 1 && y <= texture.height - 1 && x >= 0 && y >= 0;
     
-    //public Color GetMainPixelColor(int x, int y) => pixelsMain[x + y * texture.width];
+    public Color GetMainPixelColor(int x, int y) => pixelsMain[x + y * texture.width];
     public void SetPixelColor(int x, int y, Color color)
     { 
         if(x + y * texture.width > pixels.LongLength) return;
