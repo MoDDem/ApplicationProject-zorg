@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-public static class ColorHelpFunctions
+public static class ColorFunc
 {
-    public static bool IsEqualTo(Color a, Color b, float tolerance)
+    public static bool IsEqualTo(Color a, Color b, float tolerance = 0.1f)
     {
         return Math.Abs(a.r - b.r) < tolerance && 
                Math.Abs(a.g - b.g) < tolerance && 

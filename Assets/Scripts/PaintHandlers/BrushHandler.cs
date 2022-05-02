@@ -55,7 +55,7 @@ public class BrushHandler : MonoBehaviour, IPaintTool
                 if (!img.CheckValidPoint(_x, _y) || img.GetPixelColor(_x, _y) == newColor)
                     continue;
                 Color color;
-                if (!ColorHelpFunctions.IsEqualTo(img.GetMainPixelColor(_x, _y), Color.black, 0.1f))
+                if (!ColorFunc.IsEqualTo(img.GetMainPixelColor(_x, _y), Color.black, 0.1f))
                     color = newColor;
                 else
                     color = img.GetPixelColor(_x, _y);

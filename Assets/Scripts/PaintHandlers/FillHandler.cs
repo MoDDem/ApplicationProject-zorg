@@ -57,7 +57,8 @@ public class FillHandler : MonoBehaviour, IPaintTool
     
     private IEnumerator Flood(int x, int y, Color oldColor, Color newColor)
     {
-        if (oldColor == newColor || ColorHelpFunctions.IsEqualTo(oldColor, Color.black, 0.1f)) yield break;
+        if (ColorFunc.IsEqualTo(oldColor, newColor) || 
+            ColorFunc.IsEqualTo(oldColor, Color.black)) yield break;
 
         int w = img.paintedTexture.width;
         int h = img.paintedTexture.height;
@@ -70,23 +71,23 @@ public class FillHandler : MonoBehaviour, IPaintTool
 
         while (stack.Pop(ref x, ref y)) {
             y1 = y;
-            while (y1 >= 0 && img.GetPixelColor(x, y1) == oldColor) {
+            while (y1 >= 0 && ColorFunc.IsEqualTo(img.GetPixelColor(x, y1), oldColor)) {
                 y1--;
             }
             y1++;
             spanLeft = spanRight = false;
-            while (y1 < h && img.GetPixelColor(x, y1) == oldColor) {
+            while (y1 < h && ColorFunc.IsEqualTo(img.GetPixelColor(x, y1), oldColor)) {
                 img.SetPixelColor(x, y1, newColor);
-                if (!spanLeft && x > 0 && img.GetPixelColor(x - 1, y1) == oldColor) {
+                if (!spanLeft && x > 0 && ColorFunc.IsEqualTo(img.GetPixelColor(x - 1, y1), oldColor)) {
                     if (!stack.Push(x - 1, y1)) yield break;
                     spanLeft = true;
-                } else if (spanLeft && x > 0 && img.GetPixelColor(x - 1, y1) != oldColor) {
+                } else if (spanLeft && x > 0 && ColorFunc.IsEqualTo(img.GetPixelColor(x - 1, y1), oldColor)) {
                     spanLeft = false;
                 }
-                if (!spanRight && x < w - 1 && img.GetPixelColor(x + 1, y1) == oldColor) {
+                if (!spanRight && x < w - 1 && ColorFunc.IsEqualTo(img.GetPixelColor(x + 1, y1), oldColor)) {
                     if (!stack.Push(x + 1, y1)) yield break;
                     spanRight = true;
-                } else if (spanRight && x < w - 1 && x < w && img.GetPixelColor(x + 1, y1) != oldColor) {
+                } else if (spanRight && x < w - 1 && x < w && ColorFunc.IsEqualTo(img.GetPixelColor(x + 1, y1), oldColor)) {
                     spanRight = false;
                 }
                 y1++;
